@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dashboard - LinuxMon Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Red+Hat+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Red Hat Text', 'Segoe UI', Tahoma, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            color: #2d3748;
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-bottom: 3px solid #764ba2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2d3748;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .btn {
+            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .container {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .card h2 {
+            color: #2d3748;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 0.5rem;
+        }
+        .metric {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #764ba2;
+            margin: 0.5rem 0;
+        }
+        .subtitle {
+            font-size: 0.85rem;
+            color: #718096;
+            margin: 0.25rem 0;
+        }
+        .canvas-container {
+            height: 200px;
+            margin: 1rem 0;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .stat-item {
+            text-align: center;
+            padding: 0.5rem;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 6px;
+        }
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #764ba2;
+        }
+        .stat-label {
+            font-size: 0.75rem;
+            color: #718096;
+        }
+        .system-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+        }
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.25rem 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .info-label {
+            font-weight: 500;
+            color: #4a5568;
+        }
+        .info-value {
+            color: #2d3748;
+            font-family: monospace;
+        }
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+        }
+        .table th {
+            background: #667eea;
+            color: white;
+            padding: 0.75rem;
+            text-align: left;
+        }
+        .table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #718096;
+        }
+        .error {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border-left: 4px solid #e53e3e;
+        }
+        .uptime {
+            font-family: monospace;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>LinuxMon Pro - Dashboard</h1>
+        <div class="user-info">
+            <span id="userWelcome">Bienvenido</span>
+            <button class="btn" onclick="logout()">Cerrar Sesión</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Información del Sistema -->
+        <div class="grid">
+            <div class="card">
+                <h2>Información del Sistema</h2>
+                <div class="system-info">
+                    <div class="info-item">
+                        <span class="info-label">Hostname:</span>
+                        <span class="info-value" id="system-hostname">--</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Distribución:</span>
+                        <span class="info-value" id="system-distro">--</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Kernel:</span>
+                        <span class="info-value" id="system-kernel">--</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Arquitectura:</span>
+                        <span class="info-value" id="system-arch">--</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Plataforma:</span>
+                        <span class="info-value" id="system-platform">--</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Uptime:</span>
+                        <span class="info-value uptime" id="system-uptime">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>CPU</h2>
+                <div class="metric" id="cpuUsage">--%</div>
+                <div class="canvas-container">
+                    <canvas id="cpuChart"></canvas>
+                </div>
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="cpuCores">--</div>
+                        <div class="stat-label">Núcleos</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="cpuSpeed">--</div>
+                        <div class="stat-label">GHz</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="cpuTemp">--°C</div>
+                        <div class="stat-label">Temperatura</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Memoria</h2>
+                <div class="metric" id="memUsage">--%</div>
+                <div class="canvas-container">
+                    <canvas id="memChart"></canvas>
+                </div>
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="memTotal">-- GB</div>
+                        <div class="stat-label">Total</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="memUsed">-- GB</div>
+                        <div class="stat-label">Usado</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="memFree">-- GB</div>
+                        <div class="stat-label">Libre</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Load Average y Procesos -->
+        <div class="grid">
+            <div class="card">
+                <h2>Load Average</h2>
+                <div class="metric" id="loadAverage">--</div>
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="load1">--</div>
+                        <div class="stat-label">1 minuto</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="load5">--</div>
+                        <div class="stat-label">5 minutos</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="load15">--</div>
+                        <div class="stat-label">15 minutos</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Procesos</h2>
+                <div class="metric" id="processCount">--</div>
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="processRunning">--</div>
+                        <div class="stat-label">Ejecutando</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="processSleeping">--</div>
+                        <div class="stat-label">Durmiendo</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="processTotal">--</div>
+                        <div class="stat-label">Total</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Procesador</h2>
+                <div class="system-info">
+                    <div class="info-item">
+                        <span class="info-label">Modelo:</span>
+                        <span class="info-value" id="cpuModel">--</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Fabricante:</span>
+                        <span class="info-value" id="cpuManufacturer">--</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Núcleos:</span>
+                        <span class="info-value" id="cpuCoresInfo">--</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Velocidad:</span>
+                        <span class="info-value" id="cpuSpeedInfo">-- GHz</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Procesos y Discos -->
+        <div class="grid">
+            <div class="card">
+                <h2>Procesos (Top 10)</h2>
+                <div id="processesContent">
+                    <div class="loading">Cargando procesos...</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Discos</h2>
+                <div id="disksContent">
+                    <div class="loading">Cargando información de discos...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Red -->
+        <div class="card">
+            <h2>Interfaces de Red</h2>
+            <div id="networkContent">
+                <div class="loading">Cargando interfaces de red...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let cpuChart, memChart;
+        let cpuData = [];
+        let memData = [];
+        let labels = [];
+
+        // Formatear uptime
+        function formatUptime(seconds) {
+            const days = Math.floor(seconds / 86400);
+            const hours = Math.floor((seconds % 86400) / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            
+            if (days > 0) {
+                return `${days}d ${hours}h ${minutes}m`;
+            } else if (hours > 0) {
+                return `${hours}h ${minutes}m`;
+            } else {
+                return `${minutes}m`;
+            }
+        }
+
+        // Formatear bytes a GB
+        function formatBytes(bytes) {
+            return (bytes / 1024 / 1024 / 1024).toFixed(2) + ' GB';
+        }
+
+        // Verificar autenticación
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/auth/check');
+                const data = await response.json();
+                
+                if (!data.authenticated) {
+                    window.location.href = '/login';
+                    return false;
+                }
+                
+                document.getElementById('userWelcome').textContent = `Bienvenido, ${data.user.fullName}`;
+                return true;
+            } catch (error) {
+                window.location.href = '/login';
+                return false;
+            }
+        }
+
+        // Cerrar sesión
+        async function logout() {
+            try {
+                await fetch('/api/auth/logout', { method: 'POST' });
+                window.location.href = '/login';
+            } catch (error) {
+                window.location.href = '/login';
+            }
+        }
+
+        // Obtener métricas del sistema
+        async function fetchMetrics() {
+            try {
+                const response = await fetch('/api/system/metrics');
+                if (!response.ok) throw new Error('Error fetching metrics');
+                
+                const data = await response.json();
+                updateDashboard(data);
+            } catch (error) {
+                console.error('Error fetching metrics:', error);
+            }
+        }
+
+        // Actualizar el dashboard con los datos
+        function updateDashboard(data) {
+            // Actualizar información del sistema
+            document.getElementById('system-hostname').textContent = data.system.hostname;
+            document.getElementById('system-distro').textContent = data.system.distro;
+            document.getElementById('system-kernel').textContent = data.system.kernel;
+            document.getElementById('system-arch').textContent = data.system.arch;
+            document.getElementById('system-platform').textContent = data.system.platform;
+            document.getElementById('system-uptime').textContent = formatUptime(data.system.uptime);
+            
+            // Actualizar CPU
+            document.getElementById('cpuUsage').textContent = data.cpu.usage + '%';
+            document.getElementById('cpuCores').textContent = data.cpu.cores;
+            document.getElementById('cpuCoresInfo').textContent = data.cpu.cores;
+            document.getElementById('cpuSpeed').textContent = data.cpu.speed;
+            document.getElementById('cpuSpeedInfo').textContent = data.cpu.speed + ' GHz';
+            document.getElementById('cpuModel').textContent = data.cpu.brand;
+            document.getElementById('cpuManufacturer').textContent = data.cpu.manufacturer || 'Unknown';
+            document.getElementById('cpuTemp').textContent = data.cpu.temperature ? Math.round(data.cpu.temperature) + '°C' : 'N/A';
+            
+            // Actualizar Memoria
+            const memUsage = data.memory.usage;
+            document.getElementById('memUsage').textContent = memUsage + '%';
+            document.getElementById('memTotal').textContent = formatBytes(data.memory.total);
+            document.getElementById('memUsed').textContent = formatBytes(data.memory.used);
+            document.getElementById('memFree').textContent = formatBytes(data.memory.free);
+            
+            // Actualizar Load Average y Procesos
+            document.getElementById('loadAverage').textContent = data.cpu.load1?.toFixed(2) || '0.00';
+            document.getElementById('load1').textContent = data.cpu.load1?.toFixed(2) || '0.00';
+            document.getElementById('load5').textContent = data.cpu.load5?.toFixed(2) || '0.00';
+            document.getElementById('load15').textContent = data.cpu.load15?.toFixed(2) || '0.00';
+            
+            document.getElementById('processCount').textContent = data.processes.total;
+            document.getElementById('processRunning').textContent = data.processes.running;
+            document.getElementById('processSleeping').textContent = data.processes.sleeping;
+            document.getElementById('processTotal').textContent = data.processes.total;
+            
+            // Actualizar gráficos
+            updateCharts(data.cpu.usage, memUsage);
+            
+            // Actualizar procesos
+            updateProcesses(data.processes.list);
+            
+            // Actualizar discos
+            updateDisks(data.disk);
+            
+            // Actualizar red
+            updateNetwork(data.network);
+        }
+
+        // Actualizar gráficos
+        function updateCharts(cpuUsage, memUsage) {
+            const now = new Date().toLocaleTimeString();
+            
+            labels.push(now);
+            cpuData.push(cpuUsage);
+            memData.push(memUsage);
+            
+            if (labels.length > 10) {
+                labels.shift();
+                cpuData.shift();
+                memData.shift();
+            }
+            
+            if (!cpuChart) {
+                const cpuCtx = document.getElementById('cpuChart').getContext('2d');
+                cpuChart = new Chart(cpuCtx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'CPU %',
+                            data: cpuData,
+                            borderColor: '#764ba2',
+                            backgroundColor: 'rgba(118, 75, 162, 0.1)',
+                            borderWidth: 2,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, max: 100 }
+                        }
+                    }
+                });
+            } else {
+                cpuChart.data.labels = labels;
+                cpuChart.data.datasets[0].data = cpuData;
+                cpuChart.update();
+            }
+            
+            if (!memChart) {
+                const memCtx = document.getElementById('memChart').getContext('2d');
+                memChart = new Chart(memCtx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Memoria %',
+                            data: memData,
+                            borderColor: '#667eea',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            borderWidth: 2,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, max: 100 }
+                        }
+                    }
+                });
+            } else {
+                memChart.data.labels = labels;
+                memChart.data.datasets[0].data = memData;
+                memChart.update();
+            }
+        }
+
+        // Actualizar tabla de procesos
+        function updateProcesses(processes) {
+            const container = document.getElementById('processesContent');
+            
+            if (processes.length === 0) {
+                container.innerHTML = '<div class="loading">No hay procesos</div>';
+                return;
+            }
+            
+            let html = '<table class="table">';
+            html += '<tr><th>Nombre</th><th>CPU %</th><th>Memoria</th><th>PID</th><th>Estado</th></tr>';
+            
+            processes.slice(0, 10).forEach(proc => {
+                html += `
+                    <tr>
+                        <td>${proc.name}</td>
+                        <td>${proc.cpu.toFixed(1)}%</td>
+                        <td>${(proc.memory / 1024 / 1024).toFixed(1)} MB</td>
+                        <td>${proc.pid}</td>
+                        <td>${proc.state}</td>
+                    </tr>
+                `;
+            });
+            
+            html += '</table>';
+            container.innerHTML = html;
+        }
+
+        // Actualizar información de discos
+        function updateDisks(disks) {
+            const container = document.getElementById('disksContent');
+            
+            if (disks.length === 0) {
+                container.innerHTML = '<div class="loading">No hay discos montados</div>';
+                return;
+            }
+            
+            let html = '<table class="table">';
+            html += '<tr><th>Punto de Montaje</th><th>Tipo</th><th>Uso</th><th>Total</th><th>Libre</th></tr>';
+            
+            disks.forEach(disk => {
+                const totalGB = (disk.size / 1024 / 1024 / 1024).toFixed(1);
+                const freeGB = (disk.available / 1024 / 1024 / 1024).toFixed(1);
+                
+                html += `
+                    <tr>
+                        <td>${disk.mount}</td>
+                        <td>${disk.type}</td>
+                        <td>${disk.usage}%</td>
+                        <td>${totalGB} GB</td>
+                        <td>${freeGB} GB</td>
+                    </tr>
+                `;
+            });
+            
+            html += '</table>';
+            container.innerHTML = html;
+        }
+
+        // Actualizar información de red
+        function updateNetwork(network) {
+            const container = document.getElementById('networkContent');
+            
+            if (network.interfaces.length === 0) {
+                container.innerHTML = '<div class="loading">No hay interfaces de red</div>';
+                return;
+            }
+            
+            let html = '<table class="table">';
+            html += '<tr><th>Interfaz</th><th>IP Address</th><th>MAC</th><th>Tipo</th><th>Tráfico</th></tr>';
+            
+            network.interfaces.forEach(iface => {
+                const stats = network.stats.find(s => s.iface === iface.iface) || {};
+                const traffic = stats.rx_sec ? `↓${(stats.rx_sec / 1024).toFixed(1)}K/s ↑${(stats.tx_sec / 1024).toFixed(1)}K/s` : 'Sin datos';
+                
+                html += `
+                    <tr>
+                        <td>${iface.iface}</td>
+                        <td>${iface.ip4 || 'N/A'}</td>
+                        <td>${iface.mac || 'N/A'}</td>
+                        <td>${iface.internal ? 'Interna' : 'Externa'}</td>
+                        <td>${traffic}</td>
+                    </tr>
+                `;
+            });
+            
+            html += '</table>';
+            container.innerHTML = html;
+        }
+
+        // Inicializar la aplicación
+        async function init() {
+            if (await checkAuth()) {
+                // Obtener métricas inmediatamente
+                await fetchMetrics();
+                
+                // Actualizar cada 2 segundos
+                setInterval(fetchMetrics, 2000);
+            }
+        }
+
+        // Iniciar cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

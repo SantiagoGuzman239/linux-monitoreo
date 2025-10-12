@@ -1,0 +1,12 @@
+[
+  {
+    "id": "214f0bed-0730-4615-8088-d02d2973d6c5",
+    "username": "santiago",
+    "password": "$2a$12$dJO80LT6cLrfMh1r3CbXyuD1SVN1NFIygd3hBpCLfrQfNZgvJhSMa",
+    "email": "esantiago.guzman@gmail.com",
+    "fullName": "Santiago Guzman",
+    "role": "admin",
+    "createdAt": "2025-10-05T23:03:57.544Z",
+    "isActive": true
+  }
+]
