@@ -5,171 +5,347 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Dashboard - LinuxMon Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Red+Hat+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --primary: #1a1a2e;
+            --secondary: #16213e;
+            --accent-1: #0f3460;
+            --accent-2: #e94560;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --card-bg: rgba(30, 30, 46, 0.7);
+            --success: #4ade80;
+            --warning: #fbbf24;
+            --danger: #f87171;
+            --info: #60a5fa;
+        }
+
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+        }
+        
         body {
             font-family: 'Red Hat Text', 'Segoe UI', Tahoma, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #333;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: var(--text-primary);
             min-height: 100vh;
+            line-height: 1.6;
         }
+        
         .header {
-            background: rgba(255, 255, 255, 0.95);
+            background: var(--accent-1);
             backdrop-filter: blur(10px);
-            color: #2d3748;
             padding: 1rem 2rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border-bottom: 3px solid #764ba2;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
+        
         .header h1 {
             margin: 0;
             font-size: 1.5rem;
             font-weight: 600;
-            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
         }
+        
+        .header h1 i {
+            color: var(--accent-2);
+        }
+        
         .user-info {
             display: flex;
             align-items: center;
             gap: 1rem;
         }
+        
         .btn {
-            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+            background: linear-gradient(135deg, var(--accent-2) 0%, #c53030 100%);
             color: white;
             border: none;
             border-radius: 6px;
             padding: 0.5rem 1rem;
             cursor: pointer;
             font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(233, 69, 96, 0.4);
+        }
+        
         .container {
             padding: 2rem;
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
         }
+        
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
+        
         .card {
-            background: rgba(255, 255, 255, 0.95);
+            background: var(--card-bg);
             backdrop-filter: blur(10px);
             border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
             padding: 1.5rem;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
         }
-        .card h2 {
-            color: #2d3748;
-            margin-bottom: 1rem;
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .card-header h2 {
             font-size: 1.2rem;
             font-weight: 600;
-            border-bottom: 2px solid #667eea;
-            padding-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
+        
+        .card-header i {
+            color: var(--accent-2);
+        }
+        
         .metric {
             font-size: 2.5rem;
             font-weight: 700;
-            color: #764ba2;
             margin: 0.5rem 0;
+            background: linear-gradient(135deg, var(--accent-2) 0%, var(--info) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
+        
         .subtitle {
             font-size: 0.85rem;
-            color: #718096;
+            color: var(--text-secondary);
             margin: 0.25rem 0;
         }
+        
         .canvas-container {
             height: 200px;
             margin: 1rem 0;
         }
+        
         .stats {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 1rem;
             margin-top: 1rem;
         }
+        
         .stat-item {
             text-align: center;
-            padding: 0.5rem;
-            background: rgba(102, 126, 234, 0.1);
-            border-radius: 6px;
+            padding: 0.75rem 0.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            transition: background 0.3s ease;
         }
+        
+        .stat-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
         .stat-value {
             font-size: 1.2rem;
             font-weight: 600;
-            color: #764ba2;
+            color: var(--text-primary);
         }
+        
         .stat-label {
             font-size: 0.75rem;
-            color: #718096;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
         }
+        
         .system-info {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 0.5rem;
+            gap: 0.75rem;
             margin-top: 1rem;
             font-size: 0.85rem;
         }
+        
         .info-item {
             display: flex;
             justify-content: space-between;
-            padding: 0.25rem 0;
-            border-bottom: 1px solid #e2e8f0;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
+        
         .info-label {
             font-weight: 500;
-            color: #4a5568;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
+        
         .info-value {
-            color: #2d3748;
+            color: var(--text-primary);
             font-family: monospace;
         }
+        
         .table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 1rem;
             font-size: 0.85rem;
         }
+        
         .table th {
-            background: #667eea;
+            background: var(--accent-1);
             color: white;
             padding: 0.75rem;
             text-align: left;
+            font-weight: 600;
         }
+        
         .table td {
             padding: 0.75rem;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
+        
+        .table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
         .loading {
             text-align: center;
             padding: 2rem;
-            color: #718096;
+            color: var(--text-secondary);
         }
+        
         .error {
-            background: #fed7d7;
-            color: #c53030;
+            background: rgba(248, 113, 113, 0.1);
+            color: var(--danger);
             padding: 1rem;
             border-radius: 8px;
             margin: 1rem 0;
-            border-left: 4px solid #e53e3e;
+            border-left: 4px solid var(--danger);
         }
+        
         .uptime {
             font-family: monospace;
             font-size: 0.8rem;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .badge-success {
+            background: rgba(74, 222, 128, 0.2);
+            color: var(--success);
+        }
+        
+        .badge-warning {
+            background: rgba(251, 191, 36, 0.2);
+            color: var(--warning);
+        }
+        
+        .badge-danger {
+            background: rgba(248, 113, 113, 0.2);
+            color: var(--danger);
+        }
+        
+        .badge-info {
+            background: rgba(96, 165, 250, 0.2);
+            color: var(--info);
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .container {
+                padding: 1.5rem;
+            }
+            
+            .grid {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .system-info {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .card {
+                padding: 1rem;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .metric {
+                font-size: 2rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>LinuxMon Pro - Dashboard</h1>
+        <h1><i class="fas fa-chart-line"></i> LinuxMon Pro - Dashboard</h1>
         <div class="user-info">
             <span id="userWelcome">Bienvenido</span>
-            <button class="btn" onclick="logout()">Cerrar Sesión</button>
+            <button class="btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
         </div>
     </div>
 
@@ -177,37 +353,43 @@
         <!-- Información del Sistema -->
         <div class="grid">
             <div class="card">
-                <h2>Información del Sistema</h2>
+                <div class="card-header">
+                    <h2><i class="fas fa-server"></i> Información del Sistema</h2>
+                    <span class="badge badge-info">Sistema</span>
+                </div>
                 <div class="system-info">
                     <div class="info-item">
-                        <span class="info-label">Hostname:</span>
+                        <span class="info-label"><i class="fas fa-desktop"></i> Hostname:</span>
                         <span class="info-value" id="system-hostname">--</span>
                     </div>
                     <div class="info-item">
-                        <span class="info-label">Distribución:</span>
+                        <span class="info-label"><i class="fas fa-linux"></i> Distribución:</span>
                         <span class="info-value" id="system-distro">--</span>
                     </div>
                     <div class="info-item">
-                        <span class="info-label">Kernel:</span>
+                        <span class="info-label"><i class="fas fa-code-branch"></i> Kernel:</span>
                         <span class="info-value" id="system-kernel">--</span>
                     </div>
                     <div class="info-item">
-                        <span class="info-label">Arquitectura:</span>
+                        <span class="info-label"><i class="fas fa-microchip"></i> Arquitectura:</span>
                         <span class="info-value" id="system-arch">--</span>
                     </div>
                     <div class="info-item">
-                        <span class="info-label">Plataforma:</span>
+                        <span class="info-label"><i class="fas fa-layer-group"></i> Plataforma:</span>
                         <span class="info-value" id="system-platform">--</span>
                     </div>
                     <div class="info-item">
-                        <span class="info-label">Uptime:</span>
+                        <span class="info-label"><i class="fas fa-clock"></i> Uptime:</span>
                         <span class="info-value uptime" id="system-uptime">--</span>
                     </div>
                 </div>
             </div>
 
             <div class="card">
-                <h2>CPU</h2>
+                <div class="card-header">
+                    <h2><i class="fas fa-microchip"></i> CPU</h2>
+                    <span class="badge badge-warning" id="cpuStatus">--</span>
+                </div>
                 <div class="metric" id="cpuUsage">--%</div>
                 <div class="canvas-container">
                     <canvas id="cpuChart"></canvas>
@@ -229,7 +411,10 @@
             </div>
 
             <div class="card">
-                <h2>Memoria</h2>
+                <div class="card-header">
+                    <h2><i class="fas fa-memory"></i> Memoria</h2>
+                    <span class="badge badge-info" id="memStatus">--</span>
+                </div>
                 <div class="metric" id="memUsage">--%</div>
                 <div class="canvas-container">
                     <canvas id="memChart"></canvas>
@@ -254,7 +439,10 @@
         <!-- Load Average y Procesos -->
         <div class="grid">
             <div class="card">
-                <h2>Load Average</h2>
+                <div class="card-header">
+                    <h2><i class="fas fa-tachometer-alt"></i> Load Average</h2>
+                    <span class="badge badge-success" id="loadStatus">Normal</span>
+                </div>
                 <div class="metric" id="loadAverage">--</div>
                 <div class="stats">
                     <div class="stat-item">
@@ -273,7 +461,10 @@
             </div>
 
             <div class="card">
-                <h2>Procesos</h2>
+                <div class="card-header">
+                    <h2><i class="fas fa-tasks"></i> Procesos</h2>
+                    <span class="badge badge-info" id="processStatus">--</span>
+                </div>
                 <div class="metric" id="processCount">--</div>
                 <div class="stats">
                     <div class="stat-item">
@@ -292,22 +483,25 @@
             </div>
 
             <div class="card">
-                <h2>Procesador</h2>
+                <div class="card-header">
+                    <h2><i class="fas fa-microchip"></i> Información del Procesador</h2>
+                    <span class="badge badge-info">Detalles</span>
+                </div>
                 <div class="system-info">
                     <div class="info-item">
-                        <span class="info-label">Modelo:</span>
+                        <span class="info-label"><i class="fas fa-microchip"></i> Modelo:</span>
                         <span class="info-value" id="cpuModel">--</span>
                     </div>
                     <div class="info-item">
-                        <span class="info-label">Fabricante:</span>
+                        <span class="info-label"><i class="fas fa-industry"></i> Fabricante:</span>
                         <span class="info-value" id="cpuManufacturer">--</span>
                     </div>
                     <div class="info-item">
-                        <span class="info-label">Núcleos:</span>
+                        <span class="info-label"><i class="fas fa-th"></i> Núcleos:</span>
                         <span class="info-value" id="cpuCoresInfo">--</span>
                     </div>
                     <div class="info-item">
-                        <span class="info-label">Velocidad:</span>
+                        <span class="info-label"><i class="fas fa-tachometer-alt"></i> Velocidad:</span>
                         <span class="info-value" id="cpuSpeedInfo">-- GHz</span>
                     </div>
                 </div>
@@ -317,25 +511,34 @@
         <!-- Procesos y Discos -->
         <div class="grid">
             <div class="card">
-                <h2>Procesos (Top 10)</h2>
+                <div class="card-header">
+                    <h2><i class="fas fa-list"></i> Procesos (Top 10)</h2>
+                    <span class="badge badge-info">Activos</span>
+                </div>
                 <div id="processesContent">
-                    <div class="loading">Cargando procesos...</div>
+                    <div class="loading"><i class="fas fa-spinner fa-spin"></i> Cargando procesos...</div>
                 </div>
             </div>
 
             <div class="card">
-                <h2>Discos</h2>
+                <div class="card-header">
+                    <h2><i class="fas fa-hdd"></i> Discos</h2>
+                    <span class="badge badge-warning" id="diskStatus">--</span>
+                </div>
                 <div id="disksContent">
-                    <div class="loading">Cargando información de discos...</div>
+                    <div class="loading"><i class="fas fa-spinner fa-spin"></i> Cargando información de discos...</div>
                 </div>
             </div>
         </div>
 
         <!-- Red -->
         <div class="card">
-            <h2>Interfaces de Red</h2>
+            <div class="card-header">
+                <h2><i class="fas fa-network-wired"></i> Interfaces de Red</h2>
+                <span class="badge badge-success" id="networkStatus">Conectado</span>
+            </div>
             <div id="networkContent">
-                <div class="loading">Cargando interfaces de red...</div>
+                <div class="loading"><i class="fas fa-spinner fa-spin"></i> Cargando interfaces de red...</div>
             </div>
         </div>
     </div>
@@ -428,6 +631,19 @@
             document.getElementById('cpuManufacturer').textContent = data.cpu.manufacturer || 'Unknown';
             document.getElementById('cpuTemp').textContent = data.cpu.temperature ? Math.round(data.cpu.temperature) + '°C' : 'N/A';
             
+            // Actualizar estado de CPU
+            const cpuStatus = document.getElementById('cpuStatus');
+            if (data.cpu.usage > 80) {
+                cpuStatus.className = 'badge badge-danger';
+                cpuStatus.textContent = 'Alto';
+            } else if (data.cpu.usage > 60) {
+                cpuStatus.className = 'badge badge-warning';
+                cpuStatus.textContent = 'Medio';
+            } else {
+                cpuStatus.className = 'badge badge-success';
+                cpuStatus.textContent = 'Normal';
+            }
+            
             // Actualizar Memoria
             const memUsage = data.memory.usage;
             document.getElementById('memUsage').textContent = memUsage + '%';
@@ -435,16 +651,53 @@
             document.getElementById('memUsed').textContent = formatBytes(data.memory.used);
             document.getElementById('memFree').textContent = formatBytes(data.memory.free);
             
+            // Actualizar estado de Memoria
+            const memStatus = document.getElementById('memStatus');
+            if (memUsage > 80) {
+                memStatus.className = 'badge badge-danger';
+                memStatus.textContent = 'Alto';
+            } else if (memUsage > 60) {
+                memStatus.className = 'badge badge-warning';
+                memStatus.textContent = 'Medio';
+            } else {
+                memStatus.className = 'badge badge-success';
+                memStatus.textContent = 'Normal';
+            }
+            
             // Actualizar Load Average y Procesos
             document.getElementById('loadAverage').textContent = data.cpu.load1?.toFixed(2) || '0.00';
             document.getElementById('load1').textContent = data.cpu.load1?.toFixed(2) || '0.00';
             document.getElementById('load5').textContent = data.cpu.load5?.toFixed(2) || '0.00';
             document.getElementById('load15').textContent = data.cpu.load15?.toFixed(2) || '0.00';
             
+            // Actualizar estado de Load Average
+            const loadStatus = document.getElementById('loadStatus');
+            const load1 = data.cpu.load1 || 0;
+            if (load1 > data.cpu.cores * 2) {
+                loadStatus.className = 'badge badge-danger';
+                loadStatus.textContent = 'Crítico';
+            } else if (load1 > data.cpu.cores) {
+                loadStatus.className = 'badge badge-warning';
+                loadStatus.textContent = 'Alto';
+            } else {
+                loadStatus.className = 'badge badge-success';
+                loadStatus.textContent = 'Normal';
+            }
+            
             document.getElementById('processCount').textContent = data.processes.total;
             document.getElementById('processRunning').textContent = data.processes.running;
             document.getElementById('processSleeping').textContent = data.processes.sleeping;
             document.getElementById('processTotal').textContent = data.processes.total;
+            
+            // Actualizar estado de Procesos
+            const processStatus = document.getElementById('processStatus');
+            if (data.processes.total > 500) {
+                processStatus.className = 'badge badge-warning';
+                processStatus.textContent = 'Muchos';
+            } else {
+                processStatus.className = 'badge badge-success';
+                processStatus.textContent = 'Normal';
+            }
             
             // Actualizar gráficos
             updateCharts(data.cpu.usage, memUsage);
@@ -482,10 +735,11 @@
                         datasets: [{
                             label: 'CPU %',
                             data: cpuData,
-                            borderColor: '#764ba2',
-                            backgroundColor: 'rgba(118, 75, 162, 0.1)',
+                            borderColor: '#e94560',
+                            backgroundColor: 'rgba(233, 69, 96, 0.1)',
                             borderWidth: 2,
-                            fill: true
+                            fill: true,
+                            tension: 0.4
                         }]
                     },
                     options: {
@@ -493,7 +747,24 @@
                         maintainAspectRatio: false,
                         plugins: { legend: { display: false } },
                         scales: {
-                            y: { beginAtZero: true, max: 100 }
+                            y: { 
+                                beginAtZero: true, 
+                                max: 100,
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                },
+                                ticks: {
+                                    color: 'rgba(255, 255, 255, 0.7)'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                },
+                                ticks: {
+                                    color: 'rgba(255, 255, 255, 0.7)'
+                                }
+                            }
                         }
                     }
                 });
@@ -512,10 +783,11 @@
                         datasets: [{
                             label: 'Memoria %',
                             data: memData,
-                            borderColor: '#667eea',
-                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            borderColor: '#60a5fa',
+                            backgroundColor: 'rgba(96, 165, 250, 0.1)',
                             borderWidth: 2,
-                            fill: true
+                            fill: true,
+                            tension: 0.4
                         }]
                     },
                     options: {
@@ -523,7 +795,24 @@
                         maintainAspectRatio: false,
                         plugins: { legend: { display: false } },
                         scales: {
-                            y: { beginAtZero: true, max: 100 }
+                            y: { 
+                                beginAtZero: true, 
+                                max: 100,
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                },
+                                ticks: {
+                                    color: 'rgba(255, 255, 255, 0.7)'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                },
+                                ticks: {
+                                    color: 'rgba(255, 255, 255, 0.7)'
+                                }
+                            }
                         }
                     }
                 });

@@ -5,11 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Página No Encontrada - LinuxMon Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Red+Hat+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --primary: #1a1a2e;
+            --secondary: #16213e;
+            --accent-1: #0f3460;
+            --accent-2: #e94560;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --card-bg: rgba(30, 30, 46, 0.7);
+            --success: #4ade80;
+            --warning: #fbbf24;
+            --danger: #f87171;
+            --info: #60a5fa;
+        }
+
         body {
             font-family: 'Red Hat Text', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: var(--text-primary);
             margin: 0;
             padding: 0;
             display: flex;
@@ -18,39 +33,80 @@
             min-height: 100vh;
             text-align: center;
         }
+        
         .container {
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--card-bg);
             backdrop-filter: blur(10px);
             padding: 3rem;
             border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            max-width: 500px;
+            margin: 1rem;
         }
+        
+        .error-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+            color: var(--accent-2);
+        }
+        
         h1 {
             font-size: 4rem;
             margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--accent-2) 0%, var(--info) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
+        
         p {
             font-size: 1.2rem;
             margin-bottom: 2rem;
+            color: var(--text-secondary);
         }
+        
         a {
-            color: white;
+            color: var(--text-primary);
             text-decoration: none;
-            background: rgba(255, 255, 255, 0.2);
+            background: linear-gradient(135deg, var(--accent-2) 0%, #c53030 100%);
             padding: 0.75rem 1.5rem;
             border-radius: 8px;
-            transition: background 0.3s ease;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
         }
+        
         a:hover {
-            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(233, 69, 96, 0.4);
+        }
+        
+        /* Responsive */
+        @media (max-width: 480px) {
+            .container {
+                padding: 2rem;
+            }
+            
+            h1 {
+                font-size: 3rem;
+            }
+            
+            .error-icon {
+                font-size: 4rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <div class="error-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
         <h1>404</h1>
         <p>Página no encontrada</p>
-        <a href="/">Volver al Inicio</a>
+        <a href="/"><i class="fas fa-home"></i> Volver al Inicio</a>
     </div>
 </body>
 </html>
