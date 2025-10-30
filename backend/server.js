@@ -45,7 +45,7 @@ app.use(cors());
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Configuración de sesiones CORREGIDA
+// Configuración de sesiones
 const sessionConfig = {
     secret: process.env.SESSION_SECRET,
     resave: false,
@@ -128,7 +128,7 @@ const requireAuth = (req, res, next) => {
     }
 };
 
-// Rutas de autenticación CORREGIDAS
+// Rutas de autenticación
 app.post('/api/auth/register', async (req, res) => {
     try {
         const { username, password, email, fullName } = req.body;
@@ -208,7 +208,7 @@ app.post('/api/auth/logout', (req, res) => {
     });
 });
 
-// Ruta de métricas del sistema - MEJORADA con información real
+// Ruta de métricas del sistema
 app.get('/api/system/metrics', requireAuth, async (req, res) => {
     try {
         const [
@@ -392,11 +392,7 @@ app.get('/api/system/info', requireAuth, async (req, res) => {
     }
 });
 
-// Rutas del frontend - CORREGIDAS para servir archivos estáticos correctamente
-app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'login.html'));
-});
-
+// Rutas del frontend - CORREGIDAS
 app.get('/register', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'register.html'));
 });
@@ -405,12 +401,27 @@ app.get('/dashboard', requireAuth, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
+// Ruta principal ahora apunta a index.html (antes login.html)
 app.get('/', (req, res) => {
     if (req.session.user) {
         res.redirect('/dashboard');
     } else {
-        res.redirect('/login');
+        res.sendFile(path.join(__dirname, 'public', 'index.html'));
     }
+});
+
+// Ruta de login para compatibilidad
+app.get('/login', (req, res) => {
+    if (req.session.user) {
+        res.redirect('/dashboard');
+    } else {
+        res.redirect('/');
+    }
+});
+
+// Manejo de rutas no encontradas
+app.use((req, res) => {
+    res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
 });
 
 // Inicialización del servidor

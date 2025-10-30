@@ -47,6 +47,12 @@
             width: 100%;
             max-width: 400px;
             border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .login-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
         }
         
         .header {
@@ -147,6 +153,10 @@
             text-decoration: none;
             font-weight: 500;
             transition: color 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
         
         .register-link a:hover {
@@ -184,8 +194,8 @@
 <body>
     <div class="login-container">
         <div class="header">
-            <h1><i class="fas fa-chart-line"></i> LinuxMon Pro</h1>
-            <div class="subtitle">Alma Linux Monitoring System</div>
+            <h1><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</h1>
+            <div class="subtitle">Sistema de Monitoreo Alma Linux</div>
         </div>
         
         <form id="loginForm">
@@ -208,7 +218,7 @@
             <button type="submit" class="btn"><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</button>
             
             <div class="register-link">
-                ¿No tienes cuenta? <a href="/register">Regístrate</a>
+                ¿No tienes cuenta? <a href="/register"><i class="fas fa-user-plus"></i> Regístrate aquí</a>
             </div>
             
             <div id="message" class="error-message"></div>
@@ -222,10 +232,13 @@
             const message = document.getElementById('message');
             message.style.display = 'none';
             
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
+            const formData = {
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value
+            };
             
-            if (!username || !password) {
+            // Validación básica
+            if (!formData.username || !formData.password) {
                 message.textContent = 'Por favor completa todos los campos';
                 message.className = 'error-message';
                 message.style.display = 'block';
@@ -238,16 +251,13 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        username: username,
-                        password: password
-                    })
+                    body: JSON.stringify(formData)
                 });
                 
                 const data = await response.json();
                 
                 if (response.ok) {
-                    message.textContent = '¡Login exitoso! Redirigiendo...';
+                    message.textContent = '¡Inicio de sesión exitoso! Redirigiendo...';
                     message.className = 'success-message';
                     message.style.display = 'block';
                     

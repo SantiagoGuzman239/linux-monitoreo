@@ -8,5 +8,15 @@
     "role": "admin",
     "createdAt": "2025-10-05T23:03:57.544Z",
     "isActive": true
+  },
+  {
+    "id": "6ea74df2-b504-4dee-abe2-e664f9dc2a1a",
+    "username": "pepe",
+    "password": "$2a$12$SAZAxNKFWJcltAQpiIvdtODtcNpSmRhE/hIkRjwWA0JE.HSybBsg6",
+    "email": "pepe@gmail.com",
+    "fullName": "pepe p",
+    "role": "user",
+    "createdAt": "2025-10-30T00:01:42.988Z",
+    "isActive": true
   }
 ]

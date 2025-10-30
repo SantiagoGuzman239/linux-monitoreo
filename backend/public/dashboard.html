@@ -576,14 +576,14 @@
                 const data = await response.json();
                 
                 if (!data.authenticated) {
-                    window.location.href = '/login';
+                    window.location.href = '/';  // CORREGIDO: Cambiado de '/login' a '/'
                     return false;
                 }
                 
                 document.getElementById('userWelcome').textContent = `Bienvenido, ${data.user.fullName}`;
                 return true;
             } catch (error) {
-                window.location.href = '/login';
+                window.location.href = '/';  // CORREGIDO: Cambiado de '/login' a '/'
                 return false;
             }
         }
@@ -592,9 +592,9 @@
         async function logout() {
             try {
                 await fetch('/api/auth/logout', { method: 'POST' });
-                window.location.href = '/login';
+                window.location.href = '/';  // CORREGIDO: Cambiado de '/login' a '/'
             } catch (error) {
-                window.location.href = '/login';
+                window.location.href = '/';  // CORREGIDO: Cambiado de '/login' a '/'
             }
         }
 
